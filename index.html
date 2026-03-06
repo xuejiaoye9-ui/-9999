@@ -3,154 +3,193 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>暖心生活模拟 - 角色创建</title>
+    <title>平行世界 - 灵魂塑造</title>
     <style>
-        /* 定义你的专属暖色调 */
         :root {
-            --bg-warm: #fdf6ec;      /* 米色背景 */
+            --bg-warm: #fdf6ec;      
             --card-white: #ffffff;
-            --accent-pink: #ffefef;   /* 暖粉色 */
-            --accent-yellow: #fdf9e1; /* 暖黄色 */
-            --text-black: #2d3436;    /* 深咖黑，比纯黑更柔和 */
-            --primary-border: #e8e0d5; 
+            --accent-pink: #ffefef;   
+            --accent-yellow: #fdf9e1; 
+            --text-black: #2d3436;    
+            --soft-gray: #a0a0a0;
         }
 
-        body { 
-            font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif; 
-            background-color: var(--bg-warm); 
+        body, html { 
+            margin: 0; padding: 0; width: 100%; height: 100%; 
+            font-family: 'PingFang SC', sans-serif; 
+            background-color: var(--bg-warm);
             color: var(--text-black);
-            display: flex; 
-            justify-content: center; 
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
+            overflow: hidden;
         }
 
-        .container { 
-            background: var(--card-white); 
-            padding: 40px; 
-            border-radius: 30px; 
-            box-shadow: 0 20px 40px rgba(180, 160, 140, 0.1); 
-            width: 100%; 
-            max-width: 420px;
-            border: 1px solid var(--primary-border);
+        .view-section {
+            position: absolute;
+            width: 100%; height: 100%;
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        h2 { 
-            text-align: center; 
-            font-weight: 300;
-            letter-spacing: 2px;
-            margin-bottom: 30px;
+        .hidden { opacity: 0; pointer-events: none; transform: scale(0.95); }
+
+        /* 通用卡片样式 */
+        .game-card {
+            background: white; padding: 35px; border-radius: 40px;
+            width: 85%; max-width: 450px;
+            box-shadow: 0 20px 50px rgba(180, 160, 140, 0.1);
+            text-align: center;
         }
 
-        /* 预览框：使用暖黄色背景 */
-        .avatar-preview { 
-            width: 100px;
-            height: 100px;
-            background: var(--accent-yellow); 
-            border-radius: 50%; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            font-size: 50px; 
-            margin: 0 auto 30px;
-            border: 4px solid var(--accent-pink);
+        /* 属性加点样式 */
+        .stat-row {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 18px; background: var(--bg-warm);
+            padding: 8px 15px; border-radius: 20px;
+        }
+        .stat-label { font-size: 15px; font-weight: bold; }
+        .stat-controls { display: flex; align-items: center; gap: 15px; }
+        .stat-btn {
+            width: 30px; height: 30px; border-radius: 50%; border: none;
+            background: white; cursor: pointer; font-size: 18px;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
 
-        .input-group { margin-bottom: 20px; }
-
-        label { 
-            display: block; 
-            margin-bottom: 8px; 
-            font-size: 14px; 
-            color: #888;
-        }
-
-        /* 输入框：米色底，黑色字 */
-        input, select { 
-            width: 100%; 
-            padding: 14px; 
-            background: var(--bg-warm);
-            border: 1px solid transparent;
-            border-radius: 15px; 
-            box-sizing: border-box; 
-            font-size: 16px;
-            color: var(--text-black);
-            transition: all 0.3s ease;
-        }
-
-        input:focus { 
-            outline: none;
-            background: var(--card-white);
-            border-color: var(--accent-pink);
-            box-shadow: 0 0 0 4px var(--accent-pink);
-        }
-
-        /* 按钮：深色背景，白色文字 */
-        .btn-submit { 
-            width: 100%; 
-            padding: 16px; 
-            background: var(--text-black); 
-            color: white; 
-            border: none; 
-            border-radius: 50px; 
-            font-size: 16px; 
-            cursor: pointer; 
+        /* MBTI 网格 */
+        .mbti-grid {
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;
             margin-top: 20px;
-            transition: opacity 0.3s;
+        }
+        .mbti-item {
+            padding: 10px 5px; border-radius: 12px; border: 1px solid var(--accent-pink);
+            font-size: 12px; cursor: pointer; transition: 0.3s;
+        }
+        .mbti-item:hover { background: var(--accent-yellow); }
+        .mbti-item.selected { background: var(--text-black); color: white; }
+
+        .btn-next {
+            width: 100%; padding: 15px; background: var(--text-black);
+            color: white; border: none; border-radius: 50px;
+            margin-top: 25px; cursor: pointer; font-size: 16px;
         }
 
-        .btn-submit:hover { opacity: 0.8; }
-
+        /* 动画逻辑同前 */
+        @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-15px)} }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h2>新 的 旅 程</h2>
-    
-    <div class="avatar-preview" id="charPic">👶</div>
+    <audio id="bgm" loop>
+        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
+    </audio>
 
-    <div class="input-group">
-        <label>姓名</label>
-        <input type="text" id="name" placeholder="为自己起个名字...">
-    </div>
+    <section id="cover-view" class="view-section" onclick="showMenu()">
+        <div style="font-size: 80px; animation: float 3s infinite;">🏠</div>
+        <div style="margin-top: 30px; letter-spacing: 3px; color: #888;">欢迎来到属于你的平行世界</div>
+        <p style="font-size: 12px; color: #bbb;">- 点击开启悠闲时光 -</p>
+    </section>
 
-    <div class="input-group">
-        <label>性别</label>
-        <select id="gender">
-            <option value="男孩">男孩</option>
-            <option value="女孩">女孩</option>
-            <option value="多元">其他</option>
-        </select>
-    </div>
+    <section id="menu-view" class="view-section hidden">
+        <div class="game-card">
+            <h2 style="font-weight: 300;">时光驿站</h2>
+            <button class="btn-next" style="background:none; color:black; border:1px solid black" onclick="showCreate()">新 游 戏</button>
+            <button class="btn-next" style="background:none; color:gray; border:1px solid #ddd" onclick="alert('记忆消失在风中...')">寻找存档</button>
+        </div>
+    </section>
 
-    <div class="input-group">
-        <label>初始年龄</label>
-        <input type="number" id="age" value="0" min="0">
-    </div>
+    <section id="create-view" class="view-section hidden">
+        <div class="game-card">
+            <h3>基础设定</h3>
+            <input type="text" id="pName" placeholder="怎么称呼你？" style="width:90%; padding:15px; border:none; background:var(--bg-warm); border-radius:15px; margin-bottom:15px;">
+            <select id="pGender" style="width:100%; padding:15px; border:none; background:var(--bg-warm); border-radius:15px;">
+                <option>男孩</option>
+                <option>女孩</option>
+            </select>
+            <button class="btn-next" onclick="showStats()">下一步：分配天赋</button>
+        </div>
+    </section>
 
-    <div class="input-group">
-        <label>选择外形</label>
-        <select id="look" onchange="document.getElementById('charPic').innerText = this.value">
-            <option value="👶">初生婴儿</option>
-            <option value="👦">活泼男孩</option>
-            <option value="👧">可爱女孩</option>
-            <option value="🧑">职场青年</option>
-            <option value="🐱">灵魂伴侣(猫?)</option>
-        </select>
-    </div>
+    <section id="stats-view" class="view-section hidden">
+        <div class="game-card">
+            <h3>天赋分配</h3>
+            <p style="font-size: 14px; color: #888;">剩余点数: <span id="points" style="color:var(--text-black); font-weight:bold;">20</span></p>
+            
+            <div id="stat-container">
+                </div>
 
-    <button class="btn-submit" onclick="startLife()">开启模拟</button>
-</div>
+            <button class="btn-next" onclick="showMBTI()">下一步：性格印记</button>
+        </div>
+    </section>
 
-<script>
-    function startLife() {
-        const name = document.getElementById('name').value || '无名小卒';
-        alert(`✨ 欢迎来到这个世界，${name}！`);
-        // 下一步：进入属性点分配或第一天剧情
-    }
-</script>
+    <section id="mbti-view" class="view-section hidden">
+        <div class="game-card">
+            <h3>性格印记</h3>
+            <p style="font-size: 13px; color: #888;">这决定了你与世界的相处方式</p>
+            <div class="mbti-grid" id="mbtiGrid">
+                </div>
+            <button class="btn-next" onclick="finishAll()">开启人生之旅</button>
+        </div>
+    </section>
 
+    <script>
+        let points = 20;
+        const stats = { "美貌值": 0, "体力值": 0, "金币值": 0, "声望值": 0, "学习值": 0, "摆烂值": 0 };
+        const mbtis = ["INTJ","INTP","ENTJ","ENTP","INFJ","INFP","ENFJ","ENFP","ISTJ","ISFJ","ESTJ","ESFJ","ISTP","ISFP","ESTP","ESFP"];
+        let selectedMBTI = "";
+
+        // 视图切换
+        function switchView(from, to) {
+            document.getElementById(from).classList.add('hidden');
+            document.getElementById(to).classList.remove('hidden');
+        }
+
+        function showMenu() { document.getElementById('bgm').play(); switchView('cover-view', 'menu-view'); }
+        function showCreate() { switchView('menu-view', 'create-view'); }
+        
+        // 生成属性界面
+        function showStats() {
+            const container = document.getElementById('stat-container');
+            container.innerHTML = Object.keys(stats).map(s => `
+                <div class="stat-row">
+                    <span class="stat-label">${s}</span>
+                    <div class="stat-controls">
+                        <button class="stat-btn" onclick="updateStat('${s}', -1)">-</button>
+                        <span id="val-${s}">${stats[s]}</span>
+                        <button class="stat-btn" onclick="updateStat('${s}', 1)">+</button>
+                    </div>
+                </div>
+            `).join('');
+            switchView('create-view', 'stats-view');
+        }
+
+        function updateStat(name, change) {
+            if (change > 0 && points > 0) {
+                stats[name]++; points--;
+            } else if (change < 0 && stats[name] > 0) {
+                stats[name]--; points++;
+            }
+            document.getElementById(`val-${name}`).innerText = stats[name];
+            document.getElementById(`points`).innerText = points;
+        }
+
+        // 生成MBTI界面
+        function showMBTI() {
+            const grid = document.getElementById('mbtiGrid');
+            grid.innerHTML = mbtis.map(m => `<div class="mbti-item" onclick="selectMBTI(this, '${m}')">${m}</div>`).join('');
+            switchView('stats-view', 'mbti-view');
+        }
+
+        function selectMBTI(el, m) {
+            document.querySelectorAll('.mbti-item').forEach(i => i.classList.remove('selected'));
+            el.classList.add('selected');
+            selectedMBTI = m;
+        }
+
+        function finishAll() {
+            const name = document.getElementById('pName').value || '无名氏';
+            if(!selectedMBTI) { alert("请选择你的性格印记"); return; }
+            alert(`✨ 塑造完成！\n\n你好，${selectedMBTI}人格的${name}。\n你的新生活即将从这间小屋开始...`);
+        }
+    </script>
 </body>
 </html>
